@@ -3,11 +3,13 @@
 int main()
 {
 	//make BST and initialize
-	treePointer* BST[numRow];
+	treePointer* BST[numRow];// = malloc(sizeof(treePointer) * numRow);
+	
 	for (int i = 0; i < numRow; i++) {
-		BST[i] = NULL;
+		treePointer pNode = 0;
+		BST[i] = &pNode;
 		for(int j=0; j<numCol; j++)
-			BSTInsert(*BST+i, matrix[i][j],i);
+			BSTInsert(&BST[i], matrix[i][j],i);
 	}
 
 	//make loser tree
@@ -19,39 +21,52 @@ int main()
 	SetLeafNodes(loserTree, BST);
 
 	//set nonleaf nodes of loser tree and print first winner
-	SetNonleafNodes(loserTree, winner);
+	SetNonleafNodes(loserTree, winner); //¿À·ù
 	PrintWinner(loserTree);
-	BSTRemove(BST[(*loserTree[0])->data.row], *loserTree[0]);
+	BSTRemove(BST+(*loserTree[0])->data.row, loserTree);
 
 	//restructure loser tree and print winners
 	while (isEmpty(BST)) {
 		Restructure(loserTree, winner);
 		PrintWinner(loserTree);
-		BSTRemove(BST[(*loserTree[0])->data.row], *loserTree[0]);
+		BSTRemove(BST+(*loserTree[0])->data.row, loserTree);
 	}
 	return 0;
 }
 
-
-void BSTInsert(treePointer* pRoot, int k, int row)
+//void BSTInsert(treePointer*pRoot, int k, int row)
+void BSTInsert(treePointer** pRoot, int k, int row)
 {
 	/*if tree has a node whose key is same as k, count + 1
 	  if tree doesn't have a node with k, make a new node and place it on right place
 	*/
 
-	treePointer ptr, temp = modifiedSearch(*pRoot, k);
-	if (temp || !(*pRoot)) {
+	treePointer ptr;
+	treePointer temp = modifiedSearch(**pRoot, k);
+	if ((temp) || !(**pRoot)) 
+	{
 		MALLOC(ptr, sizeof(*ptr));
 		ptr->data.key = k;
 		ptr->data.row = row;
 		ptr->data.count = 0;
 		ptr->leftChild = ptr->rightChild = NULL;
 
-		if (*pRoot)
-			if (k < temp->data.key) temp->leftChild = ptr;
-			else temp->rightChild = ptr;
-		else *pRoot = ptr;
+		if (**pRoot)
+			if (k < (temp)->data.key) (temp)->leftChild = ptr;
+			else (temp)->rightChild = ptr;
+		else **pRoot = ptr;
 	}
+	else {
+		while ((**pRoot)->data.key != k) {
+			if ((**pRoot)->data.key < k)
+				(**pRoot) = (**pRoot)->rightChild;
+			else
+				(**pRoot) = (**pRoot)->leftChild;
+		}
+		(**pRoot)->data.count++;
+	}
+		
+	
 }
 
 treePointer modifiedSearch(treePointer tree, int k)
@@ -60,18 +75,19 @@ treePointer modifiedSearch(treePointer tree, int k)
 	   if tree is not empty and doesn't have that kind of node, return latest visited node
 	   if tree is empty, return NULL
 	*/
+	//treePointer cNode = 0;
 	treePointer cNode = tree;
 
-	while (cNode) {
-		if (k == cNode->data.key) return cNode;
-		if (k < cNode->data.key)
-			if (cNode->leftChild)
-				cNode = cNode->leftChild;
+	while (cNode!= NULL) {
+		if (k == (cNode)->data.key) return cNode;
+		if (k < (cNode)->data.key)
+			if ((cNode)->leftChild)
+				(cNode) = (cNode)->leftChild;
 			else
 				return cNode;
 		else
-			if (cNode->rightChild)
-				cNode = cNode->rightChild;
+			if ((cNode)->rightChild)
+				(cNode) = (cNode)->rightChild;
 			else
 				return cNode;
 	}
@@ -274,13 +290,13 @@ treePointer* Compare(treePointer* tree1, treePointer* tree2)
 				return tree2;
 }
 
-void SetLeafNodes(treePointer** loserTree, treePointer** BST)
+void SetLeafNodes(treePointer* loserTree[], treePointer* BST[])
 {
 	for (int i = 0; i < numRow; i++)
 		loserTree[numRow * 2 - (i + 1)] = BST[i];
 }
 
-void SetNonleafNodes(treePointer** loserTree, treePointer** winner)
+void SetNonleafNodes(treePointer* loserTree[], treePointer* winner[])
 {
 	for (int i = numRow - 1; i > 0; i--) {
 		if ((*(loserTree[i]))->leftChild->leftChild == NULL && ((*(loserTree[i]))->rightChild->leftChild != NULL)) {

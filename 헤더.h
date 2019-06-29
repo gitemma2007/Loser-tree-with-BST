@@ -31,7 +31,7 @@ typedef struct node {
 
 //void BSTMakeAndInit(treePointer* pRoot);
 Element BSTGetNodeData(treePointer bst);
-void BSTInsert(treePointer* pRoot, int, int);
+void BSTInsert(treePointer** pRoot, int, int);
 //treePointer BSTSearch(treePointer bst, Element target);
 treePointer modifiedSearch(treePointer, int);
 void RemoveLeftSubTree(treePointer bt);
@@ -50,7 +50,7 @@ void MakeLeftSubTree(treePointer main, treePointer sub);
 void MakeRightSubTree(treePointer main, treePointer sub);
 
 treePointer* Compare(treePointer* tree1, treePointer* tree2);
-void SetLeafNodes(treePointer** loserTree, treePointer** BST);
-void SetNonleafNodes(treePointer** loserTree, treePointer** winner);
+void SetLeafNodes(treePointer* loserTree[], treePointer* BST[]);
+void SetNonleafNodes(treePointer* loserTree[], treePointer* winner[]);
 void PrintWinner(treePointer** loserTree);
 void Restructure(treePointer** loserTree, treePointer** winner);
